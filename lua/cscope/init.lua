@@ -592,7 +592,14 @@ M.setup = function(opts)
 	end
 
 	if type(M.opts.db_file) == "string" then
-		db.add(M.opts.db_file)
+        -- Local cscope.out db file has priority over envvar
+        local db_path = os.getenv("CSCOPE_DB")
+        local working_dir = os.getenv("CSCOPE_WD")
+		if vim.fn.filereadable(cscope_out) == 1 then
+			db.add(M.opts.db_file)
+		elseif db_path and db_path ~= "" then
+			db.add(db_path.."::"..working_dir)
+		end
 	else -- table
 		for _, f in ipairs(M.opts.db_file) do
 			db.add(f)
